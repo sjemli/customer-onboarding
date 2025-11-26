@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: customer-onboarding
+  datasource:
+    url: jdbc:h2:mem:devdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  servlet:
+    multipart:
+      max-file-size: 3MB
+      max-request-size: 6MB
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true

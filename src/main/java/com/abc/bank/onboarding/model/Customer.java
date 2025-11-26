@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "customers", indexes = {
         @Index(name = "idx_customer_ssn", columnList = "socialSecurityNumber"),
+        @Index(name = "idx_customer_email", columnList = "email"),
         @Index(name = "idx_customer_account_number", columnList = "accountNumber")
 })
 @Getter
@@ -59,12 +61,14 @@ public class Customer {
     @Column(nullable = false, unique = true, length = 9)
     private String socialSecurityNumber;
 
+    @Lob
     @Column(nullable = false)
-    private String idProofPath;
+    private byte[] idProof;
 
+    @Lob
     @Column(nullable = false)
-    private String photoPath;
+    private byte[] photo;
 
-    @Column(nullable = false, length = 18)
+    @Column(nullable = false, length = 17, unique = true)
     private String accountNumber;
 }

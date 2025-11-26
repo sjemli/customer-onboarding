@@ -5,12 +5,6 @@ import jakarta.validation.ConstraintValidatorContext;
 
 public class BsnValidator implements ConstraintValidator<Bsn, String> {
 
-    @Override
-    public boolean isValid(String bsn, ConstraintValidatorContext context) {
-        return bsn != null && bsn.length() == 9 && hasValidElevenProefTest(bsn);
-
-    }
-
     //11-proef validation for burgerservicenummer (BSN)
     private static boolean hasValidElevenProefTest(String bsn) {
 
@@ -20,11 +14,16 @@ public class BsnValidator implements ConstraintValidator<Bsn, String> {
             if (!Character.isDigit(c)) return false;
             int digit = c - '0';
             if (i < 8) {
-                sum += (9 - i) * digit; // weights 9..2
+                sum += (9 - i) * digit;
             } else {
-                sum -= digit; // last digit subtracts
+                sum -= digit;
             }
         }
         return sum % 11 == 0;
+    }
+
+    @Override
+    public boolean isValid(String bsn, ConstraintValidatorContext context) {
+        return bsn != null && bsn.length() == 9 && hasValidElevenProefTest(bsn);
     }
 }

@@ -1,0 +1,7 @@
+package com.abc.bank.onboarding.exception;
+
+public class DuplicateCustomerException extends RuntimeException {
+    public DuplicateCustomerException(String message) {
+        super(message);
+    }
+}

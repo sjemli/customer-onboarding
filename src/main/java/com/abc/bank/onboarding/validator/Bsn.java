@@ -11,10 +11,12 @@ import java.lang.annotation.Target;
 
 @Documented
 @Constraint(validatedBy = BsnValidator.class)
-@Target({ ElementType.FIELD })
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Bsn {
     String message() default "Invalid Dutch BSN";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }
