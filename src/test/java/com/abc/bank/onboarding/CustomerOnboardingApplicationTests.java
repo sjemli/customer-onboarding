@@ -15,11 +15,11 @@ class CustomerOnboardingApplicationTests {
 
     @Test
     void contextLoads() {
+        //fails if context doesn't load properly
     }
-
 
     @Test
     void should_run_main_method_without_exceptions() {
-        CustomerOnboardingApplication.main(new String[]{});
+       CustomerOnboardingApplication.main(new String[]{});
     }
 }

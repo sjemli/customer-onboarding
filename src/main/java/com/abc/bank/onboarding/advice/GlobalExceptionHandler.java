@@ -13,22 +13,13 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.Arrays;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final String TIMESTAMP = "timestamp";
 
-    private static ProblemDetail getProblemDetail(HttpStatus httpStatus,
-                                                  String detail,
-                                                  String title,
-                                                  WebRequest request) {
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(httpStatus, detail);
-        pd.setTitle(title);
-        pd.setInstance(URI.create(request.getDescription(false)));
-        pd.setProperty(TIMESTAMP, Instant.now());
-        return pd;
-    }
 
     @ExceptionHandler(MissingServletRequestPartException.class)
     public ResponseEntity<ProblemDetail> handleMissingPart(MissingServletRequestPartException ex, WebRequest request) {
@@ -52,20 +43,31 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ProblemDetail> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
-                                                                      WebRequest request) {
+    public ResponseEntity<ProblemDetail> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         pd.setTitle("Malformed Request");
-        pd.setDetail("The request body could not be read. Please check JSON syntax or content type.");
-        pd.setProperty("debugMessage", ex.getMessage());
-        if (ex.getCause() != null) {
-            pd.setProperty("rootCause", ex.getCause().toString());
+
+        Throwable cause = ex.getCause();
+
+        String message = "Invalid request body. Please check JSON syntax and field values.";
+        if (cause instanceof tools.jackson.databind.exc.InvalidFormatException invalidFormat) {
+            String fieldName = invalidFormat.getPath().isEmpty() ? "unknown" :
+                    invalidFormat.getPath().getFirst().getPropertyName();
+            Class<?> targetType = invalidFormat.getTargetType();
+
+            if (targetType.isEnum()) {
+                Object[] enumValues = targetType.getEnumConstants();
+                message = String.format("Invalid value for field '%s'. Allowed values: %s (non case sensitive)",
+                        fieldName, Arrays.toString(enumValues));
+            } else {
+                message = String.format("Invalid value for field '%s'. Expected type: %s",
+                        fieldName, targetType.getSimpleName());
+            }
         }
-        pd.setInstance(URI.create(request.getDescription(false)));
-        pd.setProperty(TIMESTAMP, Instant.now());
-        pd.setProperty("errorType", "HttpMessageNotReadableException");
+        pd.setDetail(message);
         return ResponseEntity.badRequest().body(pd);
     }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ProblemDetail> handleGeneralException(Exception ex, WebRequest request) {
@@ -73,5 +75,16 @@ public class GlobalExceptionHandler {
                 "An unexpected error occurred.",
                 "Internal Server Error", request);
         return ResponseEntity.internalServerError().body(pd);
+    }
+
+    private static ProblemDetail getProblemDetail(HttpStatus httpStatus,
+                                                  String detail,
+                                                  String title,
+                                                  WebRequest request) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(httpStatus, detail);
+        pd.setTitle(title);
+        pd.setInstance(URI.create(request.getDescription(false)));
+        pd.setProperty(TIMESTAMP, Instant.now());
+        return pd;
     }
 }

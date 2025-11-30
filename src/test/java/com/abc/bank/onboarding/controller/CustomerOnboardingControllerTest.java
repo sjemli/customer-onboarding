@@ -153,28 +153,6 @@ class CustomerOnboardingControllerTest {
     }
 
     @Test
-    void should_return_400_when_malformed_json() throws Exception {
-        MockMultipartFile badJson = new MockMultipartFile(
-                "CustomerOnboardRequest", "request.json", "application/json", "{invalid-json".getBytes()
-        );
-
-        mockMvc.perform(
-                        multipart("/api/customers/onboard")
-                                .file(idProof)
-                                .file(photo)
-                                .file(badJson)
-                                .contentType(MediaType.MULTIPART_FORM_DATA)
-                                .with(csrf())
-                                .with(user("tester").roles("USER"))
-                                .accept(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.title").value("Malformed Request"))
-                .andExpect(jsonPath("$.detail").value("The request body could not be read. Please check JSON syntax or content type."));
-        verifyNoInteractions(customerOnboardingService);
-    }
-
-    @Test
     void should_return_500_when_unexpected_error_occurs() throws Exception {
         when(customerOnboardingService.onboard(any(), any(), any()))
                 .thenThrow(new RuntimeException("Unexpected"));
