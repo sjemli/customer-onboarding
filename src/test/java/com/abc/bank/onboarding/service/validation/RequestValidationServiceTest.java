@@ -58,7 +58,7 @@ class RequestValidationServiceTest {
         service = new RequestValidationService(validator);
     }
 
-    @ParameterizedTest(name = "should_{1}_validation_for_request")
+    @ParameterizedTest
     @MethodSource("provideRequests")
     void should_validate_request_based_on_constraints(TestCase testCase) {
         if (testCase.isValid) {
